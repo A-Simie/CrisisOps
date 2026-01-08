@@ -39,8 +39,13 @@
 - **Emergency Scripts** - Pre-written templates for calling emergency services
 - **Save for Offline** - Download guides to access without internet
 
+### 👤 User Authentication
+- **Secure Login/Signup** - Email-based authentication with password validation
+- **User Profiles** - Personal profile management with theme preferences
+- **Session Persistence** - Stay logged in across sessions
+
 ### 🎨 Modern Design
-- **Dark Theme** - Eye-friendly interface optimized for emergency situations
+- **Light & Dark Themes** - Toggle between themes, optimized for any lighting condition
 - **Animated Splash Screen** - Professional loading experience with progress indicator
 - **Mobile-First** - Designed for touch with large tap targets and safe-area support
 - **Smooth Animations** - Micro-interactions for enhanced user experience
@@ -51,10 +56,10 @@
 
 | Category | Technology |
 |----------|------------|
-| Framework | React 18 + TypeScript |
-| Build Tool | Vite |
-| Styling | Tailwind CSS |
-| Routing | React Router v6 |
+| Framework | React 19 + TypeScript |
+| Build Tool | Vite 7 |
+| Styling | Tailwind CSS 4 |
+| Routing | React Router v7 |
 | Icons | Lucide React |
 | Storage | IndexedDB via `idb` |
 | PWA | vite-plugin-pwa + Workbox |
@@ -71,7 +76,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/crisisops.git
+git clone https://github.com/A-Simie/CrisisOps.git
 cd crisisops
 
 # Install dependencies
@@ -102,9 +107,11 @@ src/
 │   ├── layout/          # PageContainer, TopStatusBar, BottomNav
 │   └── ui/              # Button, Card, StatusChip
 ├── hooks/
+│   ├── useAuth.ts       # Authentication state management
 │   ├── useLocation.ts   # Geolocation hook
 │   ├── useOnlineStatus.ts # Network status hook
-│   └── useReportQueue.ts # Report queue management
+│   ├── useReportQueue.ts # Report queue management
+│   └── useTheme.ts      # Theme switching (light/dark)
 ├── lib/
 │   ├── db.ts            # IndexedDB operations
 │   ├── hazards.ts       # Hazard types and survival guides
@@ -112,7 +119,10 @@ src/
 ├── pages/
 │   ├── Splash.tsx       # Animated landing screen
 │   ├── Onboarding.tsx   # Welcome slides
+│   ├── Login.tsx        # User login
+│   ├── Signup.tsx       # User registration
 │   ├── Home.tsx         # Dashboard
+│   ├── Profile.tsx      # User profile management
 │   ├── Survival.tsx     # Hazard library
 │   ├── SurvivalDetail.tsx # Guide details
 │   ├── Report.tsx       # Incident reporting form
