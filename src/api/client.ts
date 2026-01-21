@@ -1,5 +1,9 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+if (!API_BASE_URL) {
+  console.error('VITE_API_BASE_URL is not defined! Please check your environment variables.');
+}
+
 const ACCESS_TOKEN_KEY = 'accessToken';
 
 export const AUTH_EXPIRED_EVENT = 'auth:expired';
