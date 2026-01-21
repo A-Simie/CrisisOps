@@ -1,4 +1,5 @@
 import { getQueuedReports, updateReportStatus, getSyncMeta, setSyncMeta, type Report } from './db';
+import { api, type CreateIncidentPayload } from './api';
 
 interface SyncResult {
   success: boolean;
@@ -7,16 +8,59 @@ interface SyncResult {
   errors: string[];
 }
 
-async function mockSendReport(_report: Report): Promise<{ success: boolean; serverId?: string }> {
-  await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
-  
-  if (Math.random() > 0.1) {
-    return {
-      success: true,
-      serverId: `SRV-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+// Map frontend hazard IDs to backend HazardType enum values
+const HAZARD_TYPE_MAP: Record<string, string> = {
+  'flood': 'FLOOD',
+  'fire': 'FIRE',
+  'medical': 'MEDICAL_EMERGENCY',
+  'road-accident': 'ROAD_ACCIDENT',
+  'collapse': 'BUILDING_COLLAPSE',
+  'earthquake': 'EARTHQUAKE',
+  'extreme-cold': 'OTHER',
+  'blizzard': 'OTHER',
+  'avalanche': 'OTHER',
+  'gas-leak': 'GAS_LEAK',
+  'power-outage': 'POWER_OUTAGE',
+  'violence': 'VIOLENCE',
+  'terrorism': 'TERRORISM',
+};
+
+function mapHazardTypeToBackend(hazardType: string): string {
+  return HAZARD_TYPE_MAP[hazardType.toLowerCase()] || 'OTHER';
+}
+
+function mapSeverityToBackend(severity: number): string {
+  if (severity <= 1) return 'LOW';
+  if (severity <= 2) return 'MEDIUM';
+  if (severity <= 4) return 'HIGH';
+  return 'CRITICAL';
+}
+
+async function sendReportToServer(report: Report): Promise<{ success: boolean; serverId?: string }> {
+  try {
+    const backendHazardType = mapHazardTypeToBackend(report.hazardType);
+    const payload: CreateIncidentPayload = {
+      hazardType: backendHazardType,
+      title: `${report.hazardType.charAt(0).toUpperCase() + report.hazardType.slice(1)} Report`,
+      description: report.description || `Reported ${report.hazardType.toLowerCase()} incident`,
+      location: {
+        latitude: report.location.lat,
+        longitude: report.location.lng,
+        address: report.location.address,
+      },
+      severity: mapSeverityToBackend(report.severity),
+      media: report.mediaUrls?.map(url => ({
+        url,
+        type: url.includes('video') ? 'VIDEO' as const : 'IMAGE' as const,
+      })),
     };
+
+    const result = await api.createIncident(payload);
+    return { success: true, serverId: result.id };
+  } catch (error) {
+    console.error('Failed to send report:', error);
+    return { success: false };
   }
-  return { success: false };
 }
 
 export async function syncReports(): Promise<SyncResult> {
@@ -37,7 +81,7 @@ export async function syncReports(): Promise<SyncResult> {
   
   for (const report of queuedReports) {
     try {
-      const response = await mockSendReport(report);
+      const response = await sendReportToServer(report);
       
       if (response.success && response.serverId) {
         await updateReportStatus(report.id, 'sent', response.serverId);

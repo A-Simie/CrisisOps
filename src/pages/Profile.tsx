@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer, Button, Card } from '../components';
 import { useAuth, isLoggedIn as checkIsLoggedIn } from '../hooks/useAuth';
@@ -22,6 +22,7 @@ export function Profile() {
     const { user, logout } = useAuth();
     const { isDark, toggleTheme } = useTheme();
     const loggedIn = checkIsLoggedIn();
+    const [loggingOut, setLoggingOut] = useState(false);
 
     useEffect(() => {
         if (!loggedIn) {
@@ -29,9 +30,13 @@ export function Profile() {
         }
     }, [loggedIn, navigate]);
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
+    const handleLogout = async () => {
+        setLoggingOut(true);
+        try {
+            await logout();
+        } finally {
+            navigate('/login');
+        }
     };
 
     if (!loggedIn) {
@@ -146,6 +151,8 @@ export function Profile() {
                     variant="danger"
                     fullWidth
                     onClick={handleLogout}
+                    loading={loggingOut}
+                    disabled={loggingOut}
                 >
                     <LogOut className="w-5 h-5" />
                     Log Out

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components';
 import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { authApi } from '../api/auth';
 
 function GoogleIcon() {
     return (
@@ -38,24 +39,17 @@ export function Login() {
 
         try {
             await login(email, password);
-            navigate('/onboarding');
-        } catch {
-            setError('Login failed. Please try again.');
+            navigate('/home');
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
+            setError(message);
         }
         setLoading(false);
     };
 
-    const handleGoogleLogin = async () => {
+    const handleGoogleLogin = () => {
         setGoogleLoading(true);
-        setError('');
-
-        try {
-            await login('user@gmail.com', '', 'Google User');
-            navigate('/onboarding');
-        } catch {
-            setError('Google login failed. Please try again.');
-        }
-        setGoogleLoading(false);
+        window.location.href = authApi.getGoogleAuthUrl();
     };
 
     return (

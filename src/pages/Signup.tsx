@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components';
 import { Shield, Mail, Lock, Eye, EyeOff, User, ArrowRight, Check, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { authApi } from '../api/auth';
 
 function GoogleIcon() {
     return (
@@ -23,7 +24,7 @@ interface PasswordRequirement {
 function usePasswordStrength(password: string) {
     return useMemo(() => {
         const requirements: PasswordRequirement[] = [
-            { label: 'At least 8 characters', met: password.length >= 8 },
+            { label: 'At least 12 characters', met: password.length >= 12 },
             { label: 'One lowercase letter', met: /[a-z]/.test(password) },
             { label: 'One uppercase letter', met: /[A-Z]/.test(password) },
             { label: 'One number', met: /\d/.test(password) },
@@ -85,23 +86,16 @@ export function Signup() {
         try {
             await signup(name, email, password);
             navigate('/onboarding');
-        } catch {
-            setError('Signup failed. Please try again.');
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Signup failed. Please try again.';
+            setError(message);
         }
         setLoading(false);
     };
 
-    const handleGoogleSignup = async () => {
+    const handleGoogleSignup = () => {
         setGoogleLoading(true);
-        setError('');
-
-        try {
-            await signup('Google User', 'user@gmail.com', 'googleauth');
-            navigate('/onboarding');
-        } catch {
-            setError('Google signup failed. Please try again.');
-        }
-        setGoogleLoading(false);
+        window.location.href = authApi.getGoogleAuthUrl();
     };
 
     return (

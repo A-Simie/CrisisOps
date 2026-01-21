@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer, Button, Card, HazardGrid } from '../components';
 import { HAZARD_TYPES, type HazardType } from '../lib/hazards';
 import { useLocation } from '../hooks/useLocation';
 import { useReportQueue } from '../hooks/useReportQueue';
+import { api } from '../lib/api';
 import {
     ArrowLeft,
     ArrowRight,
@@ -11,7 +12,9 @@ import {
     MapPin,
     Check,
     AlertCircle,
-    Edit3
+    Edit3,
+    X,
+    Loader2,
 } from 'lucide-react';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
@@ -39,12 +42,14 @@ export function Report() {
     const [reportId, setReportId] = useState<string | null>(null);
 
     const isOnline = useOnlineStatus();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [selectedHazard, setSelectedHazard] = useState<HazardType | null>(null);
     const [severity, setSeverity] = useState(3);
     const [description, setDescription] = useState('');
     const [contact, setContact] = useState('');
-    const [mediaFiles, setMediaFiles] = useState<string[]>([]);
+    const [mediaFiles, setMediaFiles] = useState<{ url: string; preview: string; type: 'IMAGE' | 'VIDEO' }[]>([]);
+    const [uploadingMedia, setUploadingMedia] = useState(false);
     const [manualAddress, setManualAddress] = useState('');
 
     const stepIndex = STEPS.indexOf(currentStep);
@@ -92,7 +97,7 @@ export function Report() {
                 location: { lat: lat || 0, lng: lng || 0, address: finalAddress },
                 description: description || undefined,
                 contact: contact || undefined,
-                mediaUrls: mediaFiles,
+                mediaUrls: mediaFiles.map(m => m.url),
             });
             setReportId(report.id);
 
@@ -110,8 +115,46 @@ export function Report() {
         setSubmitting(false);
     };
 
-    const handleCameraCapture = () => {
-        setMediaFiles(prev => [...prev, `photo_${Date.now()}.jpg`]);
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const preview = URL.createObjectURL(file);
+        const isVideo = file.type.startsWith('video/');
+
+        if (isOnline) {
+            setUploadingMedia(true);
+            try {
+                const result = await api.uploadIncidentMedia(file);
+                setMediaFiles(prev => [...prev, {
+                    url: result.url,
+                    preview,
+                    type: result.type
+                }]);
+            } catch (error) {
+                console.error('Failed to upload media:', error);
+                setMediaFiles(prev => [...prev, {
+                    url: preview,
+                    preview,
+                    type: isVideo ? 'VIDEO' : 'IMAGE'
+                }]);
+            }
+            setUploadingMedia(false);
+        } else {
+            setMediaFiles(prev => [...prev, {
+                url: preview,
+                preview,
+                type: isVideo ? 'VIDEO' : 'IMAGE'
+            }]);
+        }
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const removeMedia = (index: number) => {
+        setMediaFiles(prev => prev.filter((_, i) => i !== index));
     };
 
     if (submitted) {
@@ -243,21 +286,54 @@ export function Report() {
                                 Visual evidence helps responders assess the situation
                             </p>
 
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*,video/*"
+                                capture="environment"
+                                onChange={handleFileSelect}
+                                className="hidden"
+                            />
+
                             <div className="grid grid-cols-3 gap-3">
-                                {mediaFiles.map((_, index) => (
+                                {mediaFiles.map((media, index) => (
                                     <div
                                         key={index}
-                                        className="aspect-square bg-bg-tertiary rounded-lg flex items-center justify-center"
+                                        className="aspect-square bg-bg-tertiary rounded-lg flex items-center justify-center relative overflow-hidden"
                                     >
-                                        <Camera className="w-6 h-6 text-text-muted" />
+                                        {media.type === 'VIDEO' ? (
+                                            <video
+                                                src={media.preview}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <img
+                                                src={media.preview}
+                                                alt={`Upload ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        )}
+                                        <button
+                                            onClick={() => removeMedia(index)}
+                                            className="absolute top-1 right-1 w-6 h-6 bg-danger/90 rounded-full flex items-center justify-center"
+                                        >
+                                            <X className="w-3 h-3 text-white" />
+                                        </button>
                                     </div>
                                 ))}
                                 <button
-                                    onClick={handleCameraCapture}
-                                    className="aspect-square bg-bg-secondary rounded-lg flex flex-col items-center justify-center gap-2 border-2 border-dashed border-bg-tertiary hover:border-accent transition-colors"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={uploadingMedia}
+                                    className="aspect-square bg-bg-secondary rounded-lg flex flex-col items-center justify-center gap-2 border-2 border-dashed border-bg-tertiary hover:border-accent transition-colors disabled:opacity-50"
                                 >
-                                    <Camera className="w-8 h-8 text-text-muted" />
-                                    <span className="text-xs text-text-muted">Add</span>
+                                    {uploadingMedia ? (
+                                        <Loader2 className="w-8 h-8 text-text-muted animate-spin" />
+                                    ) : (
+                                        <>
+                                            <Camera className="w-8 h-8 text-text-muted" />
+                                            <span className="text-xs text-text-muted">Add</span>
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </div>

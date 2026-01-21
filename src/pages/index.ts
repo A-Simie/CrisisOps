@@ -10,4 +10,6 @@ export { MyReports } from './MyReports';
 export { Profile } from './Profile';
 export { EmergencyCall } from './EmergencyCall';
 export { HazardPack } from './HazardPack';
+export { AuthCallback } from './AuthCallback';
 export { isLoggedIn } from '../hooks/useAuth';
+
