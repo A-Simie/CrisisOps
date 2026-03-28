@@ -45,8 +45,8 @@ function GlobalAuthHandler() {
   useEffect(() => {
     const handleVerificationRequired = () => {
       // Avoid redirect loops if already on the verify page
-      if (location.pathname !== '/verify-email') {
-        navigate('/verify-email', { replace: true });
+      if (location.pathname !== '/settings/verify-email') {
+        navigate('/settings/verify-email', { replace: true });
       }
     };
 
@@ -82,6 +82,7 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/security" element={<SecuritySettings />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/settings/verify-email" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Navigate to={getInitialRoute()} replace />} />

@@ -13,7 +13,7 @@ export const VerificationBanner = () => {
     }
 
     // Don't show on the verification page itself
-    if (location.pathname === '/verify-email') {
+    if (location.pathname === '/settings/verify-email') {
         return null;
     }
 
@@ -30,7 +30,7 @@ export const VerificationBanner = () => {
                 </div>
                 
                 <button
-                    onClick={() => navigate('/verify-email', { state: { email: user.email } })}
+                    onClick={() => navigate('/settings/verify-email', { state: { email: user.email } })}
                     className="flex items-center gap-1.5 text-xs font-bold text-accent uppercase tracking-wider hover:text-accent-light transition-colors"
                 >
                     Verify Now

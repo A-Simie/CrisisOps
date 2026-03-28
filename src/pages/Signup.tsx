@@ -86,7 +86,7 @@ export function Signup() {
 
         try {
             await signup(firstName, lastName, email, password);
-            navigate('/home');
+            navigate('/verify-email', { state: { email } });
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Signup failed. Please try again.';
             setError(message);

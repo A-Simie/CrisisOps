@@ -104,6 +104,24 @@ export function Profile() {
                         <ChevronRight className="w-5 h-5 text-text-muted" />
                     </button>
 
+                    {!user?.isEmailVerified && (
+                        <button
+                            onClick={() => navigate('/settings/verify-email')}
+                            className="w-full flex items-center justify-between p-4 bg-accent/10 border border-accent/20 rounded-xl hover:bg-accent/20 transition-all group"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-accent/20 rounded-lg group-hover:bg-accent/30 transition-colors">
+                                    <Shield className="w-5 h-5 text-accent" />
+                                </div>
+                                <div className="text-left">
+                                    <span className="block text-text-primary font-bold text-sm">Verify your email</span>
+                                    <span className="block text-xs text-text-muted">Required to report incidents</span>
+                                </div>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-accent" />
+                        </button>
+                    )}
+
                     <button
                         onClick={() => navigate('/security')}
                         className="w-full flex items-center justify-between p-4 bg-bg-secondary rounded-xl hover:bg-bg-tertiary transition-colors"
