@@ -99,6 +99,26 @@ export function getHazardById(id: string): HazardType | undefined {
   return HAZARD_TYPES.find(h => h.id === id);
 }
 
+const BACKEND_HAZARD_MAP: Record<string, string> = {
+  'FLOOD': 'flood',
+  'FIRE': 'fire',
+  'MEDICAL_EMERGENCY': 'medical',
+  'ROAD_ACCIDENT': 'road-accident',
+  'BUILDING_COLLAPSE': 'collapse',
+  'EARTHQUAKE': 'earthquake',
+  'EXTREME_WEATHER': 'extreme-cold',
+  'NATURAL_DISASTER': 'avalanche',
+  'GAS_LEAK': 'gas-leak',
+  'POWER_OUTAGE': 'power-outage',
+  'VIOLENCE': 'violence',
+  'TERRORISM': 'terrorism',
+};
+
+export function getHazardByBackendType(backendType: string): HazardType | undefined {
+  const id = BACKEND_HAZARD_MAP[backendType];
+  return id ? getHazardById(id) : undefined;
+}
+
 // Survival guide content (mock data)
 export interface SurvivalGuideContent {
   hazardType: string;
