@@ -20,7 +20,8 @@ import {
   SecuritySettings,
   VerifyEmail,
   ForgotPassword,
-  ResetPassword
+  ResetPassword,
+  Settings
 } from './pages';
 
 function getInitialRoute() {
@@ -81,6 +82,7 @@ export default function App() {
           <Route path="/hazard-pack" element={<HazardPack />} />
           <Route path="/about" element={<About />} />
           <Route path="/security" element={<SecuritySettings />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/settings/verify-email" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

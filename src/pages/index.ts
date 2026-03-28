@@ -14,6 +14,7 @@ export { AuthCallback } from './AuthCallback';
 export { About } from './About';
 export { SecuritySettings } from './SecuritySettings';
 export { VerifyEmail } from './VerifyEmail';
+export { Settings } from './Settings';
 export { ForgotPassword } from './ForgotPassword';
 export { ResetPassword } from './ResetPassword';
 export { isLoggedIn } from '../hooks/useAuth';
