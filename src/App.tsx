@@ -16,7 +16,8 @@ import {
   EmergencyCall,
   HazardPack,
   AuthCallback,
-  About
+  About,
+  SecuritySettings
 } from './pages';
 
 function getInitialRoute() {
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="/emergency" element={<EmergencyCall />} />
           <Route path="/hazard-pack" element={<HazardPack />} />
           <Route path="/about" element={<About />} />
+          <Route path="/security" element={<SecuritySettings />} />
           <Route path="*" element={<Navigate to={getInitialRoute()} replace />} />
         </Routes>
       </BrowserRouter>

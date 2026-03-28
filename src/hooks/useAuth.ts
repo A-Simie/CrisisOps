@@ -9,6 +9,7 @@ export function useAuth() {
       name: `${context.user.firstName} ${context.user.lastName}`.trim(),
       email: context.user.email,
       avatar: context.user.profilePicture,
+      hasPassword: context.user.hasPassword,
     } : null,
     isLoggedIn: context.isLoggedIn,
     isLoading: context.isLoading,

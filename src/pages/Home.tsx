@@ -26,7 +26,7 @@ function IncidentSkeleton() {
 
 export function Home() {
     const navigate = useNavigate();
-    const { coordinates, address, permissionDenied, requestLocation } = useLocation();
+    const { lat, lng, address, permissionDenied, requestLocation } = useLocation();
     const { user } = useAuth();
 
     const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -37,13 +37,13 @@ export function Home() {
     const userName = user?.name?.split(' ')[0] || 'there';
 
     const fetchIncidents = useCallback(async () => {
-        if (!coordinates) return;
+        if (lat === null || lng === null) return;
         
         try {
             setLoading(true);
             const data = await api.getNearbyIncidents({
-                latitude: coordinates.lat,
-                longitude: coordinates.lng,
+                latitude: lat,
+                longitude: lng,
                 radiusKm: 20, // Slightly larger radius for the home screen
             });
             setIncidents(data);
@@ -54,15 +54,15 @@ export function Home() {
         } finally {
             setLoading(false);
         }
-    }, [coordinates]);
+    }, [lat, lng]);
 
     useEffect(() => {
-        if (coordinates) {
+        if (lat !== null && lng !== null) {
             fetchIncidents();
         } else if (permissionDenied) {
             setLoading(false);
         }
-    }, [coordinates, fetchIncidents, permissionDenied]);
+    }, [lat, lng, fetchIncidents, permissionDenied]);
 
     const handleHazardSelect = (hazard: typeof HAZARD_TYPES[0]) => {
         navigate(`/survival/${hazard.id}`);

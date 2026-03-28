@@ -9,6 +9,7 @@ export interface User {
   profilePicture?: string;
   role: string;
   orgId?: string;
+  hasPassword?: boolean;
   createdAt: string;
 }
 
@@ -34,6 +35,15 @@ export interface UpdateProfileRequest {
   firstName?: string;
   lastName?: string;
   phone?: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword?: string;
+  newPassword?: string;
+}
+
+export interface SetPasswordRequest {
+  password?: string;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -95,5 +105,13 @@ export const authApi = {
 
   getGoogleAuthUrl: (): string => {
     return `${API_BASE_URL}/auth/google`;
+  },
+
+  changePassword: async (data: ChangePasswordRequest): Promise<void> => {
+    await api.post('/auth/change-password', data);
+  },
+
+  setPassword: async (data: SetPasswordRequest): Promise<void> => {
+    await api.post('/auth/set-password', data);
   },
 };
