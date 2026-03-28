@@ -18,9 +18,7 @@ export function useAuth() {
       await context.login(email, password);
       return true;
     },
-    signup: async (name: string, email: string, password: string) => {
-      const [firstName, ...rest] = name.split(' ');
-      const lastName = rest.join(' ') || '';
+    signup: async (firstName: string, lastName: string, email: string, password: string) => {
       await context.signup(firstName, lastName, email, password);
       return true;
     },

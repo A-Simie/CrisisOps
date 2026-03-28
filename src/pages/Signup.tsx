@@ -45,7 +45,8 @@ export function Signup() {
     const navigate = useNavigate();
     const { signup } = useAuth();
 
-    const [name, setName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -60,7 +61,7 @@ export function Signup() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!name || !email || !password || !confirmPassword) {
+        if (!firstName || !lastName || !email || !password || !confirmPassword) {
             setError('Please fill in all fields');
             return;
         }
@@ -84,8 +85,8 @@ export function Signup() {
         setError('');
 
         try {
-            await signup(name, email, password);
-            navigate('/onboarding');
+            await signup(firstName, lastName, email, password);
+            navigate('/home');
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Signup failed. Please try again.';
             setError(message);
@@ -143,17 +144,32 @@ export function Signup() {
                             </div>
                         )}
 
-                        <div className="space-y-2">
-                            <label className="text-sm text-text-secondary">Full Name</label>
-                            <div className="relative">
-                                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="John Doe"
-                                    className="w-full h-14 pl-12 pr-4 bg-bg-secondary rounded-xl text-text-primary placeholder:text-text-muted border border-bg-tertiary focus:border-accent focus:outline-none transition-colors"
-                                />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm text-text-secondary">First Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                                    <input
+                                        type="text"
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
+                                        placeholder="John"
+                                        className="w-full h-14 pl-12 pr-4 bg-bg-secondary rounded-xl text-text-primary placeholder:text-text-muted border border-bg-tertiary focus:border-accent focus:outline-none transition-colors"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm text-text-secondary">Last Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+                                    <input
+                                        type="text"
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                        placeholder="Doe"
+                                        className="w-full h-14 pl-12 pr-4 bg-bg-secondary rounded-xl text-text-primary placeholder:text-text-muted border border-bg-tertiary focus:border-accent focus:outline-none transition-colors"
+                                    />
+                                </div>
                             </div>
                         </div>
 
