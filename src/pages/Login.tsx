@@ -133,9 +133,9 @@ export function Login() {
                         </div>
 
                         <div className="flex justify-end">
-                            <button type="button" className="text-sm text-accent hover:underline">
+                            <Link to="/forgot-password" className="text-sm text-accent hover:underline">
                                 Forgot password?
-                            </button>
+                            </Link>
                         </div>
 
                         <Button type="submit" fullWidth size="lg" loading={loading} disabled={googleLoading}>

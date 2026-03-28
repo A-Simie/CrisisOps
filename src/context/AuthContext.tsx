@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import { authApi, type User, type LoginRequest, type RegisterRequest, type UpdateProfileRequest } from '../api/auth';
-import { getAccessToken, clearAccessToken, setAccessToken, AUTH_EXPIRED_EVENT } from '../api/client';
+import { authApi, type User, type LoginRequest, type RegisterRequest, type UpdateProfileRequest, type VerifyEmailRequest, type ForgotPasswordRequest, type ResetPasswordRequest } from '../api/auth';
+import { getAccessToken, clearAccessToken, setAccessToken, AUTH_EXPIRED_EVENT, VERIFICATION_REQUIRED_EVENT } from '../api/client';
 
 interface AuthContextType {
     user: User | null;
@@ -11,6 +11,10 @@ interface AuthContextType {
     logout: () => Promise<void>;
     updateProfile: (data: UpdateProfileRequest) => Promise<void>;
     setUserFromToken: (token: string) => Promise<void>;
+    verifyEmail: (data: VerifyEmailRequest) => Promise<void>;
+    resendVerification: (email: string) => Promise<void>;
+    forgotPassword: (data: ForgotPasswordRequest) => Promise<void>;
+    resetPassword: (data: ResetPasswordRequest) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -55,6 +59,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
+    // Listen for verification required events
+    useEffect(() => {
+        const handleVerificationRequired = () => {
+            console.warn('Email verification required for this action');
+            // We can add global modal or toast here if needed
+        };
+
+        window.addEventListener(VERIFICATION_REQUIRED_EVENT, handleVerificationRequired);
+        return () => {
+            window.removeEventListener(VERIFICATION_REQUIRED_EVENT, handleVerificationRequired);
+        };
+    }, []);
+
     const login = useCallback(async (email: string, password: string) => {
         const data: LoginRequest = { email, password };
         const response = await authApi.login(data);
@@ -89,6 +106,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
+    const verifyEmail = useCallback(async (data: VerifyEmailRequest) => {
+        await authApi.verifyEmail(data);
+        // Refresh user data after verification
+        const userData = await authApi.getMe();
+        setUser(userData);
+    }, []);
+
+    const resendVerification = useCallback(async (email: string) => {
+        await authApi.resendVerification(email);
+    }, []);
+
+    const forgotPassword = useCallback(async (data: ForgotPasswordRequest) => {
+        await authApi.forgotPassword(data);
+    }, []);
+
+    const resetPassword = useCallback(async (data: ResetPasswordRequest) => {
+        await authApi.resetPassword(data);
+    }, []);
+
     const value: AuthContextType = {
         user,
         isLoggedIn: !!user,
@@ -98,6 +134,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         updateProfile,
         setUserFromToken,
+        verifyEmail,
+        resendVerification,
+        forgotPassword,
+        resetPassword,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

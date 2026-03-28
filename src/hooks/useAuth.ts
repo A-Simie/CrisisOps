@@ -10,6 +10,7 @@ export function useAuth() {
       email: context.user.email,
       avatar: context.user.profilePicture,
       hasPassword: context.user.hasPassword,
+      isEmailVerified: context.user.isEmailVerified,
     } : null,
     isLoggedIn: context.isLoggedIn,
     isLoading: context.isLoading,
@@ -24,6 +25,10 @@ export function useAuth() {
       return true;
     },
     logout: context.logout,
+    verifyEmail: context.verifyEmail,
+    resendVerification: context.resendVerification,
+    forgotPassword: context.forgotPassword,
+    resetPassword: context.resetPassword,
     updateProfile: async (updates: { name?: string; email?: string; avatar?: string }) => {
       if (updates.name) {
         const [firstName, ...rest] = updates.name.split(' ');

@@ -17,7 +17,10 @@ import {
   HazardPack,
   AuthCallback,
   About,
-  SecuritySettings
+  SecuritySettings,
+  VerifyEmail,
+  ForgotPassword,
+  ResetPassword
 } from './pages';
 
 function getInitialRoute() {
@@ -30,10 +33,38 @@ function getInitialRoute() {
   return '/home';
 }
 
+import { VerificationBanner } from './components/layout/VerificationBanner';
+import { VERIFICATION_REQUIRED_EVENT } from './api/client';
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+
+function GlobalAuthHandler() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleVerificationRequired = () => {
+      // Avoid redirect loops if already on the verify page
+      if (location.pathname !== '/verify-email') {
+        navigate('/verify-email', { replace: true });
+      }
+    };
+
+    window.addEventListener(VERIFICATION_REQUIRED_EVENT, handleVerificationRequired);
+    return () => {
+      window.removeEventListener(VERIFICATION_REQUIRED_EVENT, handleVerificationRequired);
+    };
+  }, [navigate, location.pathname]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <GlobalAuthHandler />
+        <VerificationBanner />
         <Routes>
           <Route path="/" element={<Splash />} />
           <Route path="/login" element={<Login />} />
@@ -50,6 +81,9 @@ export default function App() {
           <Route path="/hazard-pack" element={<HazardPack />} />
           <Route path="/about" element={<About />} />
           <Route path="/security" element={<SecuritySettings />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Navigate to={getInitialRoute()} replace />} />
         </Routes>
       </BrowserRouter>

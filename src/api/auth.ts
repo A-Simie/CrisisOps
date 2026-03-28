@@ -10,6 +10,7 @@ export interface User {
   role: string;
   orgId?: string;
   hasPassword?: boolean;
+  isEmailVerified?: boolean;
   createdAt: string;
 }
 
@@ -43,6 +44,21 @@ export interface ChangePasswordRequest {
 }
 
 export interface SetPasswordRequest {
+  password?: string;
+}
+
+export interface VerifyEmailRequest {
+  email?: string;
+  otp: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  otp: string;
   password?: string;
 }
 
@@ -113,5 +129,21 @@ export const authApi = {
 
   setPassword: async (data: SetPasswordRequest): Promise<void> => {
     await api.post('/auth/set-password', data);
+  },
+
+  verifyEmail: async (data: VerifyEmailRequest): Promise<void> => {
+    await api.post('/auth/verify-email', data);
+  },
+
+  resendVerification: async (email: string): Promise<void> => {
+    await api.post('/auth/resend-verification', { email });
+  },
+
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<void> => {
+    await api.post('/auth/forgot-password', data);
+  },
+
+  resetPassword: async (data: ResetPasswordRequest): Promise<void> => {
+    await api.post('/auth/reset-password', data);
   },
 };

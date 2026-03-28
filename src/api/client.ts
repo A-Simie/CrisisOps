@@ -7,9 +7,14 @@ if (!API_BASE_URL) {
 const ACCESS_TOKEN_KEY = 'accessToken';
 
 export const AUTH_EXPIRED_EVENT = 'auth:expired';
+export const VERIFICATION_REQUIRED_EVENT = 'auth:verification_required';
 
 export function dispatchAuthExpired(): void {
   window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT));
+}
+
+export function dispatchVerificationRequired(): void {
+  window.dispatchEvent(new CustomEvent(VERIFICATION_REQUIRED_EVENT));
 }
 
 export function getAccessToken(): string | null {
@@ -108,7 +113,13 @@ export async function apiRequest<T>(
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new AppError(errorData.message || `Request failed: ${response.status}`, {
+    const message = errorData.message || `Request failed: ${response.status}`;
+    
+    if (response.status === 403 && message === 'Email verification required to access this feature') {
+      dispatchVerificationRequired();
+    }
+
+    throw new AppError(message, {
       statusCode: response.status,
       error: errorData.error,
       isAuthError: response.status === 401,

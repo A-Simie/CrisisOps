@@ -166,27 +166,35 @@ export function SurvivalDetail() {
                     </div>
 
                     {showCompletionPopup && (
-                        <div className="fixed inset-x-4 bottom-24 z-50 animate-in slide-in-from-bottom-8 duration-500">
-                            <Card className="bg-safe text-white border-none shadow-2xl relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-1 opacity-20">
-                                    <ShieldCheck className="w-24 h-24 -mr-8 -mt-8" />
-                                </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="bg-white/20 p-2 rounded-lg">
-                                        <ShieldCheck className="w-6 h-6" />
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 animate-in fade-in duration-300 backdrop-blur-[2px]">
+                            <div className="absolute inset-0 bg-black/40" onClick={() => setShowCompletionPopup(false)} />
+                            <Card className="relative bg-bg-secondary border-bg-tertiary shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 duration-300">
+                                <div className="flex flex-col items-center text-center space-y-4">
+                                    <div className="w-20 h-20 rounded-3xl bg-safe/10 flex items-center justify-center mb-2">
+                                        <ShieldCheck className="w-10 h-10 text-safe" />
                                     </div>
-                                    <div className="flex-1">
-                                        <h3 className="font-bold text-lg mb-1">Well Done!</h3>
-                                        <p className="text-sm opacity-90 leading-relaxed">
-                                            You've completed all the immediate steps. However, please <span className="font-bold underline">stay on guard</span>—you are still at an accident scene. Remain vigilant and follow official instructions.
+                                    
+                                    <div className="space-y-2">
+                                        <h3 className="text-2xl font-bold text-text-primary tracking-tight">Well Done!</h3>
+                                        <p className="text-text-secondary leading-relaxed text-[15px]">
+                                            You've completed all immediate steps. But please <span className="text-safe font-semibold underline decoration-2 underline-offset-4">stay on guard</span>—the situation may still be active.
                                         </p>
                                     </div>
-                                    <button 
-                                        onClick={() => setShowCompletionPopup(false)}
-                                        className="text-white/60 hover:text-white transition-colors"
-                                    >
-                                        <XCircle className="w-5 h-5" />
-                                    </button>
+
+                                    <div className="pt-4 w-full">
+                                        <Button 
+                                            variant="secondary" 
+                                            fullWidth 
+                                            onClick={() => setShowCompletionPopup(false)}
+                                            className="font-bold py-4 rounded-2xl"
+                                        >
+                                            Understood
+                                        </Button>
+                                    </div>
+
+                                    <p className="text-[11px] text-text-muted font-medium uppercase tracking-widest pt-2">
+                                        Remain vigilant
+                                    </p>
                                 </div>
                             </Card>
                         </div>
