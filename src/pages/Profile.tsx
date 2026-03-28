@@ -137,6 +137,7 @@ export function Profile() {
                     </button>
 
                     <button
+                        onClick={() => navigate('/about')}
                         className="w-full flex items-center justify-between p-4 bg-bg-secondary rounded-xl hover:bg-bg-tertiary transition-colors"
                     >
                         <div className="flex items-center gap-3">

@@ -13,6 +13,7 @@ interface ReportQueueState {
   reports: Report[];
   queuedCount: number;
   lastSyncTime: string;
+  lastSyncSummary: string | null;
   syncing: boolean;
   error: string | null;
 }
@@ -22,6 +23,7 @@ export function useReportQueue() {
     reports: [],
     queuedCount: 0,
     lastSyncTime: 'Never',
+    lastSyncSummary: null,
     syncing: false,
     error: null,
   });
@@ -68,14 +70,19 @@ export function useReportQueue() {
       const result = await syncReports();
       await loadReports();
       
-      if (!result.success) {
+      if (!result.success && result.failed > 0) {
         setState(prev => ({
           ...prev,
           syncing: false,
+          lastSyncSummary: `${result.synced} synced, ${result.failed} failed`,
           error: result.errors[0] || 'Sync failed',
         }));
       } else {
-        setState(prev => ({ ...prev, syncing: false }));
+        setState(prev => ({ 
+          ...prev, 
+          syncing: false,
+          lastSyncSummary: result.synced > 0 ? `${result.synced} report${result.synced !== 1 ? 's' : ''} synced` : null
+        }));
       }
       
       return result;

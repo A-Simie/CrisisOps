@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageContainer, Button, Card } from '../components';
 import { getHazardById, getSurvivalGuide } from '../lib/hazards';
-import { ArrowLeft, CheckCircle2, XCircle, MessageSquare, Download, Check } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, MessageSquare, Download, Check, Square, CheckSquare, ShieldCheck } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { saveSurvivalGuide, getSurvivalGuide as getStoredGuide, deleteSurvivalGuide } from '../lib/db';
 
@@ -11,6 +11,7 @@ export function SurvivalDetail() {
     const [savedOffline, setSavedOffline] = useState(false);
     const [saving, setSaving] = useState(false);
     const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+    const [showCompletionPopup, setShowCompletionPopup] = useState(false);
 
     const hazard = hazardId ? getHazardById(hazardId) : undefined;
     const guide = hazardId ? getSurvivalGuide(hazardId) : undefined;
@@ -24,6 +25,15 @@ export function SurvivalDetail() {
         }
         checkSaved();
     }, [hazardId]);
+
+    useEffect(() => {
+        if (showCompletionPopup) {
+            const timer = setTimeout(() => {
+                setShowCompletionPopup(false);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [showCompletionPopup]);
 
     if (!hazard || !guide) {
         return (
@@ -47,6 +57,10 @@ export function SurvivalDetail() {
                 next.delete(index);
             } else {
                 next.add(index);
+                // Check if all steps are now completed
+                if (guide && next.size === guide.doNow.length) {
+                    setShowCompletionPopup(true);
+                }
             }
             return next;
         });
@@ -129,31 +143,54 @@ export function SurvivalDetail() {
                                 key={index}
                                 onClick={() => toggleStep(index)}
                                 className={`
-                  w-full flex items-start gap-3 p-3 rounded-lg text-left
-                  transition-colors
+                  w-full flex items-start gap-4 p-4 rounded-xl text-left
+                  transition-all duration-200 border
                   ${completedSteps.has(index)
-                                        ? 'bg-safe/10 line-through text-text-muted'
-                                        : 'bg-bg-tertiary/50 hover:bg-bg-tertiary'
+                                        ? 'bg-safe/5 border-safe/20 text-text-muted'
+                                        : 'bg-bg-tertiary/30 border-bg-tertiary/50 hover:bg-bg-tertiary hover:border-accent/30'
                                     }
                 `}
                             >
-                                <div className={`
-                  w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5
-                  ${completedSteps.has(index)
-                                        ? 'bg-safe text-white'
-                                        : 'bg-bg-secondary text-text-muted'
-                                    }
-                `}>
+                                <div className="flex-shrink-0 mt-0.5">
                                     {completedSteps.has(index) ? (
-                                        <Check className="w-4 h-4" />
+                                        <CheckSquare className="w-6 h-6 text-safe animate-in zoom-in-50 duration-300" />
                                     ) : (
-                                        <span className="text-xs font-medium">{index + 1}</span>
+                                        <Square className="w-6 h-6 text-text-muted" />
                                     )}
                                 </div>
-                                <span className="text-sm text-text-primary">{step}</span>
+                                <span className={`text-[15px] leading-snug ${completedSteps.has(index) ? 'line-through opacity-70' : 'text-text-primary'}`}>
+                                    {step}
+                                </span>
                             </button>
                         ))}
                     </div>
+
+                    {showCompletionPopup && (
+                        <div className="fixed inset-x-4 bottom-24 z-50 animate-in slide-in-from-bottom-8 duration-500">
+                            <Card className="bg-safe text-white border-none shadow-2xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-1 opacity-20">
+                                    <ShieldCheck className="w-24 h-24 -mr-8 -mt-8" />
+                                </div>
+                                <div className="flex items-start gap-4">
+                                    <div className="bg-white/20 p-2 rounded-lg">
+                                        <ShieldCheck className="w-6 h-6" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="font-bold text-lg mb-1">Well Done!</h3>
+                                        <p className="text-sm opacity-90 leading-relaxed">
+                                            You've completed all the immediate steps. However, please <span className="font-bold underline">stay on guard</span>—you are still at an accident scene. Remain vigilant and follow official instructions.
+                                        </p>
+                                    </div>
+                                    <button 
+                                        onClick={() => setShowCompletionPopup(false)}
+                                        className="text-white/60 hover:text-white transition-colors"
+                                    >
+                                        <XCircle className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </Card>
+                        </div>
+                    )}
                 </Card>
 
                 <Card variant="danger">

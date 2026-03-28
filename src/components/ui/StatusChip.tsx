@@ -1,9 +1,11 @@
-import { Wifi, WifiOff, RefreshCw, CloudOff } from 'lucide-react';
+import { Wifi, WifiOff, RefreshCw, CloudOff, CheckCircle2 } from 'lucide-react';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import { useState, useEffect } from 'react';
 
 interface StatusChipProps {
     lastSync: string;
     queuedCount: number;
+    lastSyncSummary?: string | null;
     syncing?: boolean;
     onSyncClick?: () => void;
 }
@@ -11,10 +13,22 @@ interface StatusChipProps {
 export function StatusChip({
     lastSync,
     queuedCount,
+    lastSyncSummary,
     syncing = false,
     onSyncClick
 }: StatusChipProps) {
     const isOnline = useOnlineStatus();
+    const [showSummary, setShowSummary] = useState(false);
+
+    useEffect(() => {
+        if (lastSyncSummary && !syncing) {
+            setShowSummary(true);
+            const timer = setTimeout(() => {
+                setShowSummary(false);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [lastSyncSummary, syncing]);
 
     return (
         <div className="flex items-center gap-2">
@@ -39,28 +53,34 @@ export function StatusChip({
                 {lastSync}
             </div>
 
-            {queuedCount > 0 && (
+            {(queuedCount > 0 || (showSummary && lastSyncSummary)) && (
                 <button
                     onClick={onSyncClick}
                     disabled={!isOnline || syncing}
                     className={`
             flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium
-            transition-colors
-            ${isOnline
-                            ? 'bg-accent/15 text-accent hover:bg-accent/25 cursor-pointer'
-                            : 'bg-bg-tertiary text-text-muted cursor-not-allowed'
+            transition-all duration-300
+            ${showSummary && lastSyncSummary
+                            ? 'bg-safe/20 text-safe border border-safe/30'
+                            : isOnline
+                                ? 'bg-accent/15 text-accent hover:bg-accent/25 cursor-pointer'
+                                : 'bg-bg-tertiary text-text-muted cursor-not-allowed'
                         }
           `}
                     title={isOnline ? 'Sync now' : 'Go online to sync'}
                 >
                     {syncing ? (
                         <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : showSummary && lastSyncSummary ? (
+                        <CheckCircle2 className="w-3.5 h-3.5" />
                     ) : !isOnline ? (
                         <CloudOff className="w-3.5 h-3.5" />
                     ) : (
                         <RefreshCw className="w-3.5 h-3.5" />
                     )}
-                    <span>{queuedCount} queued</span>
+                    <span>
+                        {showSummary && lastSyncSummary ? lastSyncSummary : `${queuedCount} queued`}
+                    </span>
                 </button>
             )}
         </div>

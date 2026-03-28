@@ -16,9 +16,9 @@ const HAZARD_TYPE_MAP: Record<string, string> = {
   'road-accident': 'ROAD_ACCIDENT',
   'collapse': 'BUILDING_COLLAPSE',
   'earthquake': 'EARTHQUAKE',
-  'extreme-cold': 'OTHER',
-  'blizzard': 'OTHER',
-  'avalanche': 'OTHER',
+  'extreme-cold': 'EXTREME_WEATHER',
+  'blizzard': 'EXTREME_WEATHER',
+  'avalanche': 'NATURAL_DISASTER',
   'gas-leak': 'GAS_LEAK',
   'power-outage': 'POWER_OUTAGE',
   'violence': 'VIOLENCE',
@@ -26,7 +26,12 @@ const HAZARD_TYPE_MAP: Record<string, string> = {
 };
 
 function mapHazardTypeToBackend(hazardType: string): string {
-  return HAZARD_TYPE_MAP[hazardType.toLowerCase()] || 'OTHER';
+  const mapped = HAZARD_TYPE_MAP[hazardType.toLowerCase()];
+  if (!mapped) {
+    console.warn(`No backend mapping for hazard type: ${hazardType}. Falling back to OTHER.`);
+    return 'OTHER';
+  }
+  return mapped;
 }
 
 function mapSeverityToBackend(severity: number): string {

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 export function TopStatusBar() {
     const navigate = useNavigate();
-    const { queuedCount, lastSyncTime, syncing, sync } = useReportQueue();
+    const { queuedCount, lastSyncTime, lastSyncSummary, syncing, sync } = useReportQueue();
     const { user } = useAuth();
     const loggedIn = isLoggedIn();
 
@@ -24,6 +24,7 @@ export function TopStatusBar() {
                     <StatusChip
                         lastSync={lastSyncTime}
                         queuedCount={queuedCount}
+                        lastSyncSummary={lastSyncSummary}
                         syncing={syncing}
                         onSyncClick={sync}
                     />

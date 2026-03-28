@@ -82,9 +82,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const userData = await authApi.getMe();
             setUser(userData);
-        } catch {
+        } catch (err) {
             clearAccessToken();
-            throw new Error('Failed to fetch user data');
+            const message = err instanceof Error ? err.message : 'Failed to fetch user data';
+            throw new Error(message);
         }
     }, []);
 

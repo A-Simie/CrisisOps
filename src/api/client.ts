@@ -24,12 +24,21 @@ export function clearAccessToken(): void {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
 }
 
-export interface ApiError {
-  message: string;
+export class AppError extends Error {
   statusCode?: number;
   error?: string;
   isAuthError?: boolean;
+
+  constructor(message: string, options: { statusCode?: number; error?: string; isAuthError?: boolean } = {}) {
+    super(message);
+    this.name = 'AppError';
+    this.statusCode = options.statusCode;
+    this.error = options.error;
+    this.isAuthError = options.isAuthError;
+  }
 }
+
+export type ApiError = AppError;
 
 async function refreshAccessToken(): Promise<string | null> {
   try {
@@ -90,24 +99,20 @@ export async function apiRequest<T>(
       headers['Authorization'] = `Bearer ${newToken}`;
       response = await fetch(url, { ...options, headers, credentials: 'include' });
     } else {
-      const error: ApiError = {
-        message: 'Session expired. Please log in again.',
+      throw new AppError('Session expired. Please log in again.', {
         statusCode: 401,
         isAuthError: true,
-      };
-      throw error;
+      });
     }
   }
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const error: ApiError = {
-      message: errorData.message || `Request failed: ${response.status}`,
+    throw new AppError(errorData.message || `Request failed: ${response.status}`, {
       statusCode: response.status,
       error: errorData.error,
       isAuthError: response.status === 401,
-    };
-    throw error;
+    });
   }
 
   if (response.status === 204) {
