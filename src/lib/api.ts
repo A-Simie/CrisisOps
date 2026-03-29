@@ -79,7 +79,8 @@ async function request<T>(
     if (response.status === 401) {
       clearAccessToken();
       dispatchAuthExpired();
-      const error: ApiError = new Error('Session expired. Please log in again.');
+      const message = errorData.message || 'Session expired. Please log in again.';
+      const error: ApiError = new Error(message);
       error.statusCode = 401;
       error.isAuthError = true;
       throw error;

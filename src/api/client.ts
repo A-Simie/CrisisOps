@@ -104,7 +104,9 @@ export async function apiRequest<T>(
       headers['Authorization'] = `Bearer ${newToken}`;
       response = await fetch(url, { ...options, headers, credentials: 'include' });
     } else {
-      throw new AppError('Session expired. Please log in again.', {
+      const errorData = await response.json().catch(() => ({}));
+      const message = errorData.message || 'Session expired. Please log in again.';
+      throw new AppError(message, {
         statusCode: 401,
         isAuthError: true,
       });
