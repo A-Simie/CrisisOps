@@ -1,13 +1,12 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PageContainer, Card, Button } from '../components';
+import { PageContainer, Card } from '../components';
 import { useAuth } from '../hooks/useAuth';
-import { Shield, ChevronRight, ArrowLeft, Bell, Lock, User, Eye, Moon, Sun } from 'lucide-react';
+import { Shield, ChevronRight, ArrowLeft, Bell, Lock, User, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 
 export const Settings = () => {
     const navigate = useNavigate();
-    const { user, isEmailVerified } = useAuth();
+    const { user } = useAuth();
     const { isDark, toggleTheme } = useTheme();
 
     return (

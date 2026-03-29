@@ -13,8 +13,7 @@ import {
     Shield,
     LogOut,
     ChevronRight,
-    Bell,
-    Lock
+    Bell
 } from 'lucide-react';
 
 export function Profile() {
