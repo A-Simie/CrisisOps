@@ -20,18 +20,14 @@ export function dispatchVerificationRequired(): void {
   window.dispatchEvent(new CustomEvent(VERIFICATION_REQUIRED_EVENT));
 }
 
-// SECURE: Tokens are now managed via HttpOnly cookies by the browser. 
-// localStorage is no longer used for authentication to prevent XSS theft.
 export function getAccessToken(): string | null {
   return null;
 }
 
 export function setAccessToken(_token: string): void {
-  // No-op: cookies are set by the backend
 }
 
 export function clearAccessToken(): void {
-  // No-op: cookies are cleared by the backend
 }
 
 export class AppError extends Error {
@@ -84,10 +80,10 @@ export async function apiRequest<T>(
   skipAuth = false
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const headers: Record<string, string> = { ...(options.headers as Record<string, string>) };
-
-  // SECURE: Authorization is now handled via HttpOnly cookies.
-  // The 'Authorization' header is no longer manually injected to prevent XSS exfiltration.
+  const headers: Record<string, string> = { 
+    'X-Requested-With': 'XMLHttpRequest',
+    ...(options.headers as Record<string, string>) 
+  };
 
   if (!(options.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';

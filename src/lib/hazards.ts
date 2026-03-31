@@ -302,5 +302,8 @@ export const SURVIVAL_GUIDES: Record<string, SurvivalGuideContent> = {
 };
 
 export function getSurvivalGuide(hazardType: string): SurvivalGuideContent | undefined {
-  return SURVIVAL_GUIDES[hazardType];
+  if (Object.prototype.hasOwnProperty.call(SURVIVAL_GUIDES, hazardType)) {
+    return SURVIVAL_GUIDES[hazardType];
+  }
+  return undefined;
 }

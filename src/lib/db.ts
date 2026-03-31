@@ -1,4 +1,5 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
+import { encryptData, decryptData } from './crypto';
 
 export interface Report {
   id: string;
@@ -115,18 +116,55 @@ export async function addReport(report: Omit<Report, 'id' | 'createdAt' | 'statu
     status: 'queued',
     createdAt: Date.now(),
   };
-  await db.add('reports', newReport);
+
+  const secureReport = { ...newReport };
+  if (secureReport.location.address) {
+    secureReport.location.address = await encryptData(secureReport.location.address);
+  }
+  if (secureReport.description) {
+    secureReport.description = await encryptData(secureReport.description);
+  }
+  if (secureReport.contact) {
+    secureReport.contact = await encryptData(secureReport.contact);
+  }
+
+  await db.add('reports', secureReport as any);
   return newReport;
+}
+
+async function decryptReport(report: Report): Promise<Report> {
+  const decrypted = { ...report };
+  try {
+    if (decrypted.location.address && decrypted.location.address.length > 50) {
+      decrypted.location.address = await decryptData(decrypted.location.address);
+    }
+  } catch { }
+
+  try {
+    if (decrypted.description && decrypted.description.length > 50) {
+      decrypted.description = await decryptData(decrypted.description);
+    }
+  } catch { }
+
+  try {
+    if (decrypted.contact && decrypted.contact.length > 20) {
+      decrypted.contact = await decryptData(decrypted.contact);
+    }
+  } catch { }
+
+  return decrypted;
 }
 
 export async function getReports(): Promise<Report[]> {
   const db = await getDB();
-  return db.getAllFromIndex('reports', 'by-created');
+  const reports = await db.getAllFromIndex('reports', 'by-created');
+  return Promise.all(reports.map(decryptReport));
 }
 
 export async function getQueuedReports(): Promise<Report[]> {
   const db = await getDB();
-  return db.getAllFromIndex('reports', 'by-status', 'queued');
+  const reports = await db.getAllFromIndex('reports', 'by-status', 'queued');
+  return Promise.all(reports.map(decryptReport));
 }
 
 export async function updateReportStatus(id: string, status: Report['status'], serverId?: string): Promise<void> {
