@@ -5,6 +5,8 @@ import { Shield, Mail, Lock, Eye, EyeOff, User, ArrowRight, Check, X } from 'luc
 import { useAuth } from '../hooks/useAuth';
 import { authApi } from '../api/auth';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function GoogleIcon() {
     return (
         <svg viewBox="0 0 24 24" className="w-5 h-5">
@@ -54,6 +56,7 @@ export function Signup() {
     const [agreeTerms, setAgreeTerms] = useState(false);
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
+    const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
     const [error, setError] = useState('');
 
     const passwordStrength = usePasswordStrength(password);
@@ -63,6 +66,11 @@ export function Signup() {
 
         if (!firstName || !lastName || !email || !password || !confirmPassword) {
             setError('Please fill in all fields');
+            return;
+        }
+
+        if (!EMAIL_REGEX.test(email)) {
+            setError('Please enter a valid email address');
             return;
         }
 
@@ -182,7 +190,9 @@ export function Signup() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="you@example.com"
-                                    className="w-full h-14 pl-12 pr-4 bg-bg-secondary rounded-xl text-text-primary placeholder:text-text-muted border border-bg-tertiary focus:border-accent focus:outline-none transition-colors"
+                                    className={`w-full h-14 pl-12 pr-4 bg-bg-secondary rounded-xl text-text-primary placeholder:text-text-muted border focus:border-accent focus:outline-none transition-colors ${
+                                        error === 'Please enter a valid email address' ? 'border-danger' : 'border-bg-tertiary'
+                                    }`}
                                 />
                             </div>
                         </div>
@@ -196,18 +206,21 @@ export function Signup() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Create a password"
+                                    onFocus={() => setShowPasswordRequirements(true)}
+                                    onBlur={() => setShowPasswordRequirements(false)}
                                     className="w-full h-14 pl-12 pr-12 bg-bg-secondary rounded-xl text-text-primary placeholder:text-text-muted border border-bg-tertiary focus:border-accent focus:outline-none transition-colors"
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    onClick={() => setShowPasswordRequirements(true)} // Don't let toggle hide it if input is focused
+                                    onMouseDown={(e) => { e.preventDefault(); setShowPassword(!showPassword); }} // Using onMouseDown prevents blur
                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition-colors"
                                 >
                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
                             </div>
 
-                            {password && (
+                            {showPasswordRequirements && (
                                 <div className="space-y-3 pt-2">
                                     <div className="flex items-center gap-2">
                                         <div className="flex-1 flex gap-1">
@@ -299,7 +312,7 @@ export function Signup() {
                             fullWidth
                             size="lg"
                             loading={loading}
-                            disabled={googleLoading || !passwordStrength.isValid}
+                            disabled={googleLoading || loading || !passwordStrength.isValid || !agreeTerms}
                         >
                             Create Account
                             <ArrowRight className="w-5 h-5" />

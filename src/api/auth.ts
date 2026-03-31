@@ -9,8 +9,8 @@ export interface User {
   profilePicture?: string;
   role: string;
   orgId?: string;
-  hasPassword?: boolean;
-  isEmailVerified?: boolean;
+  authMethods: string[];
+  isEmailVerified: boolean;
   createdAt: string;
 }
 
@@ -131,8 +131,10 @@ export const authApi = {
     await api.post('/auth/set-password', data);
   },
 
-  verifyEmail: async (data: VerifyEmailRequest): Promise<void> => {
-    await api.post('/auth/verify-email', data);
+  verifyEmail: async (data: VerifyEmailRequest): Promise<LoginResponse> => {
+    const response = await api.post<LoginResponse>('/auth/verify-email', data);
+    setAccessToken(response.accessToken);
+    return response;
   },
 
   resendVerification: async (email: string): Promise<void> => {

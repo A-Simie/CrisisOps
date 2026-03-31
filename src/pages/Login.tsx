@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components';
-import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight, Check } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { authApi } from '../api/auth';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function GoogleIcon() {
     return (
@@ -25,12 +27,18 @@ export function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
+    const [agreeTerms, setAgreeTerms] = useState(false);
     const [error, setError] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email || !password) {
             setError('Please fill in all fields');
+            return;
+        }
+
+        if (!EMAIL_REGEX.test(email)) {
+            setError('Please enter a valid email address');
             return;
         }
 
@@ -41,6 +49,10 @@ export function Login() {
             await login(email, password);
             navigate('/home');
         } catch (err) {
+            if (err instanceof Error && err.message === 'UNVERIFIED_EMAIL') {
+                navigate('/verify-email', { state: { email } });
+                return;
+            }
             const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
             setError(message);
         }
@@ -106,7 +118,9 @@ export function Login() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="you@example.com"
-                                    className="w-full h-14 pl-12 pr-4 bg-bg-secondary rounded-xl text-text-primary placeholder:text-text-muted border border-bg-tertiary focus:border-accent focus:outline-none transition-colors"
+                                    className={`w-full h-14 pl-12 pr-4 bg-bg-secondary rounded-xl text-text-primary placeholder:text-text-muted border focus:border-accent focus:outline-none transition-colors ${
+                                        error === 'Please enter a valid email address' ? 'border-danger' : 'border-bg-tertiary'
+                                    }`}
                                 />
                             </div>
                         </div>
@@ -138,7 +152,25 @@ export function Login() {
                             </Link>
                         </div>
 
-                        <Button type="submit" fullWidth size="lg" loading={loading} disabled={googleLoading}>
+                        <label className="flex items-start gap-3 cursor-pointer py-2">
+                            <div
+                                onClick={() => setAgreeTerms(!agreeTerms)}
+                                className={`
+                                    w-5 h-5 rounded flex-shrink-0 flex items-center justify-center border transition-colors mt-0.5
+                                    ${agreeTerms
+                                        ? 'bg-accent border-accent'
+                                        : 'bg-bg-secondary border-bg-tertiary'
+                                    }
+                                `}
+                            >
+                                {agreeTerms && <Check className="w-3 h-3 text-white" />}
+                            </div>
+                            <span className="text-sm text-text-secondary">
+                                I agree to the Terms of Service and Privacy Policy
+                            </span>
+                        </label>
+
+                        <Button type="submit" fullWidth size="lg" loading={loading} disabled={googleLoading || loading || !agreeTerms}>
                             Sign In
                             <ArrowRight className="w-5 h-5" />
                         </Button>

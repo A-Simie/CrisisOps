@@ -12,14 +12,14 @@ export const SecuritySettings = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-    
+
     // Form states
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPasswords, setShowPasswords] = useState(false);
 
-    const hasPassword = user?.hasPassword ?? true; // Default to true if unknown
+    const hasPassword = user?.authMethods?.includes('password') ?? true;
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -71,7 +71,7 @@ export const SecuritySettings = () => {
         <PageContainer>
             <div className="space-y-6 animate-slide-up">
                 <div className="flex items-center gap-4 mb-2">
-                    <button 
+                    <button
                         onClick={() => navigate(-1)}
                         className="p-2 -ml-2 rounded-full hover:bg-bg-secondary transition-colors text-text-muted"
                     >
@@ -88,8 +88,8 @@ export const SecuritySettings = () => {
                         {hasPassword ? 'Change your password' : 'Set your password'}
                     </h2>
                     <p className="text-sm text-text-muted text-center mt-1">
-                        {hasPassword 
-                            ? 'Update your account security by choosing a strong new password.' 
+                        {hasPassword
+                            ? 'Update your account security by choosing a strong new password.'
                             : 'Since you signed up with social media, you can set a local password to log in directly.'}
                     </p>
                 </div>
@@ -137,29 +137,27 @@ export const SecuritySettings = () => {
                                     required
                                 />
                             </div>
-                            
+
                             {/* Strength Indicator */}
                             {newPassword && (
                                 <div className="mt-2 px-1">
                                     <div className="flex justify-between items-center mb-1">
                                         <span className="text-[10px] uppercase tracking-wider font-bold text-text-muted">Strength</span>
-                                        <span className={`text-[10px] font-bold ${
-                                            strength <= 25 ? 'text-danger' : 
-                                            strength <= 50 ? 'text-warning' : 
-                                            strength <= 75 ? 'text-accent' : 'text-success'
-                                        }`}>
-                                            {strength <= 25 ? 'Weak' : 
-                                             strength <= 50 ? 'Fair' : 
-                                             strength <= 75 ? 'Good' : 'Strong'}
+                                        <span className={`text-[10px] font-bold ${strength <= 25 ? 'text-danger' :
+                                                strength <= 50 ? 'text-warning' :
+                                                    strength <= 75 ? 'text-accent' : 'text-success'
+                                            }`}>
+                                            {strength <= 25 ? 'Weak' :
+                                                strength <= 50 ? 'Fair' :
+                                                    strength <= 75 ? 'Good' : 'Strong'}
                                         </span>
                                     </div>
                                     <div className="h-1 w-full bg-bg-tertiary rounded-full overflow-hidden">
-                                        <div 
-                                            className={`h-full transition-all duration-500 ${
-                                                strength <= 25 ? 'bg-danger' : 
-                                                strength <= 50 ? 'bg-warning' : 
-                                                strength <= 75 ? 'bg-accent' : 'bg-success'
-                                            }`}
+                                        <div
+                                            className={`h-full transition-all duration-500 ${strength <= 25 ? 'bg-danger' :
+                                                    strength <= 50 ? 'bg-warning' :
+                                                        strength <= 75 ? 'bg-accent' : 'bg-success'
+                                                }`}
                                             style={{ width: `${strength}%` }}
                                         />
                                     </div>
@@ -198,9 +196,9 @@ export const SecuritySettings = () => {
                             </div>
                         )}
 
-                        <Button 
-                            type="submit" 
-                            fullWidth 
+                        <Button
+                            type="submit"
+                            fullWidth
                             loading={loading}
                             disabled={loading || !newPassword || !confirmPassword || (hasPassword && !currentPassword)}
                             className="mt-6"

@@ -173,18 +173,18 @@ export function SurvivalDetail() {
                                     <div className="w-20 h-20 rounded-3xl bg-safe/10 flex items-center justify-center mb-2">
                                         <ShieldCheck className="w-10 h-10 text-safe" />
                                     </div>
-                                    
+
                                     <div className="space-y-2">
                                         <h3 className="text-2xl font-bold text-text-primary tracking-tight">Well Done!</h3>
                                         <p className="text-text-secondary leading-relaxed text-[15px]">
-                                            You've completed all immediate steps. But please <span className="text-safe font-semibold underline decoration-2 underline-offset-4">stay on guard</span>—the situation may still be active.
+                                            You've completed all immediate steps. But please <span className="text-safe font-semibold underline decoration-2 underline-offset-4">stay on guard and be alert</span>, the situation may still be active.
                                         </p>
                                     </div>
 
                                     <div className="pt-4 w-full">
-                                        <Button 
-                                            variant="secondary" 
-                                            fullWidth 
+                                        <Button
+                                            variant="secondary"
+                                            fullWidth
                                             onClick={() => setShowCompletionPopup(false)}
                                             className="font-bold py-4 rounded-2xl"
                                         >

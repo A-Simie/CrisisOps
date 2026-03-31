@@ -7,8 +7,8 @@ import { Shield, ArrowLeft, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-
 export const VerifyEmail = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { user, verifyEmail, resendVerification } = useAuth();
-    
+    const { user, isLoggedIn, verifyEmail, resendVerification } = useAuth();
+
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [loading, setLoading] = useState(false);
@@ -16,20 +16,28 @@ export const VerifyEmail = () => {
     const [success, setSuccess] = useState(false);
     const [resendLoading, setResendLoading] = useState(false);
     const [countdown, setCountdown] = useState(0);
-    
+
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     const isResetFlow = location.state?.type === 'reset';
     const guestEmail = location.state?.email;
     const targetEmail = guestEmail || user?.email;
 
+    const shouldHideChrome = !isLoggedIn || isResetFlow;
+
     useEffect(() => {
         if (targetEmail) {
             setEmail(targetEmail);
         } else if (!isResetFlow && !user) {
-            navigate('/login');
+            navigate('/dashboard');
         }
     }, [targetEmail, user, navigate, isResetFlow]);
+
+    useEffect(() => {
+        if (user?.isEmailVerified && !isResetFlow) {
+            navigate('/home');
+        }
+    }, [user?.isEmailVerified, navigate, isResetFlow]);
 
     useEffect(() => {
         if (countdown > 0) {
@@ -84,11 +92,7 @@ export const VerifyEmail = () => {
             } else {
                 await verifyEmail({ email, otp: code });
                 setSuccess(true);
-                
-                // If it was a guest flow (after signup), redirect to login
-                // If they were already logged in, redirect home
-                const nextPath = guestEmail ? '/login' : '/home';
-                setTimeout(() => navigate(nextPath), 2000);
+                setTimeout(() => navigate('/home'), 2000);
             }
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Invalid verification code';
@@ -120,21 +124,21 @@ export const VerifyEmail = () => {
     }, [otp]);
 
     return (
-        <PageContainer>
+        <PageContainer hideNav={shouldHideChrome} hideHeader={shouldHideChrome}>
             <div className="min-h-[80vh] flex flex-col items-center justify-center py-12 px-4 animate-slide-up">
                 <div className="w-full max-w-md space-y-10">
                     <div className="flex flex-col items-center text-center">
-                        <button 
+                        <button
                             onClick={() => navigate(-1)}
                             className="self-start p-2.5 -ml-2 rounded-2xl hover:bg-bg-secondary transition-all text-text-muted mb-6 border border-transparent hover:border-bg-tertiary"
                         >
                             <ArrowLeft className="w-6 h-6" />
                         </button>
-                        
+
                         <div className="w-24 h-24 bg-accent/15 rounded-[2.5rem] flex items-center justify-center mb-8 ring-8 ring-accent/5 animate-pulse-subtle">
                             <Shield className="w-12 h-12 text-accent" />
                         </div>
-                        
+
                         <h1 className="text-4xl font-black text-text-primary mb-4 tracking-tight">
                             Verify your email
                         </h1>
@@ -145,9 +149,9 @@ export const VerifyEmail = () => {
                     </div>
 
                     <Card className="p-10 border-bg-tertiary shadow-2xl relative overflow-hidden">
-                        {/* Decorative background element */}
+
                         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
-                        
+
                         <form onSubmit={handleSubmit} className="space-y-10 relative z-10">
                             <div className="flex justify-between gap-3 sm:gap-4">
                                 {otp.map((digit, index) => (
@@ -162,15 +166,14 @@ export const VerifyEmail = () => {
                                             onChange={(e) => handleOtpChange(index, e.target.value)}
                                             onKeyDown={(e) => handleKeyDown(index, e)}
                                             className={`
-                                                w-full h-16 sm:h-20 max-w-[3.5rem] sm:max-w-[4rem] text-center text-3xl font-black rounded-2xl outline-none transition-all
-                                                ${digit 
-                                                    ? 'bg-accent/10 border-2 border-accent text-accent' 
+                                                w-full h-16 sm:h-20 max-w-[3.5rem] sm:max-w-[4rem] text-center text-3xl font-black rounded-2xl outline-none transition-all ring-1 ring-gray-200
+                                                ${digit
+                                                    ? 'bg-accent/10 border-2 border-accent text-accent'
                                                     : 'bg-bg-secondary border-2 border-transparent text-text-primary group-hover:border-bg-tertiary focus:border-accent-light'
                                                 }
                                                 focus:ring-8 focus:ring-accent/10
                                             `}
                                         />
-                                        {/* Subtle underline for focus */}
                                         <div className={`absolute bottom-3 left-1/2 -translate-x-1/2 w-4 h-1 rounded-full transition-all duration-300 ${digit ? 'bg-accent h-1.5' : 'bg-transparent'}`} />
                                     </div>
                                 ))}
@@ -195,9 +198,9 @@ export const VerifyEmail = () => {
                             )}
 
                             <div className="space-y-6 pt-2">
-                                <Button 
-                                    type="submit" 
-                                    fullWidth 
+                                <Button
+                                    type="submit"
+                                    fullWidth
                                     loading={loading}
                                     disabled={loading || success || otp.some(d => !d)}
                                     size="lg"
@@ -205,7 +208,7 @@ export const VerifyEmail = () => {
                                 >
                                     Verify Account
                                 </Button>
-                                
+
                                 <div className="text-center">
                                     <button
                                         type="button"

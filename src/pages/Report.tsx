@@ -227,8 +227,9 @@ export function Report() {
                 <div className="min-h-[300px]">
                     {currentStep === 'hazard' && (
                         <div className="space-y-4 animate-fade-in">
-                            <h2 className="font-semibold text-text-primary">
+                            <h2 className="font-semibold text-text-primary flex items-center gap-1.5">
                                 What type of hazard?
+                                <span className="text-danger" title="Compulsory">*</span>
                             </h2>
                             <HazardGrid
                                 hazards={HAZARD_TYPES}
@@ -341,8 +342,9 @@ export function Report() {
 
                     {currentStep === 'location' && (
                         <div className="space-y-4 animate-fade-in">
-                            <h2 className="font-semibold text-text-primary">
+                            <h2 className="font-semibold text-text-primary flex items-center gap-1.5">
                                 Confirm location
+                                <span className="text-danger" title="Compulsory">*</span>
                             </h2>
 
                             {lat && lng ? (
@@ -398,8 +400,9 @@ export function Report() {
                             </div>
 
                             <div>
-                                <label className="block text-sm text-text-secondary mb-2">
+                                <label className="block text-sm text-text-secondary mb-2 flex items-center gap-1.5">
                                     Address / Location Description
+                                    {!lat && !lng && <span className="text-danger" title="Required if GPS is unavailable">*</span>}
                                 </label>
                                 <textarea
                                     value={manualAddress}

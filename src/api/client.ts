@@ -1,7 +1,11 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const IS_LIVE = import.meta.env.VITE_IS_LIVE === 'true';
+const LIVE_URL = import.meta.env.VITE_API_BASE_URL;
+const LOCAL_URL = import.meta.env.VITE_API_BASE_URL_LOCAL;
+
+const API_BASE_URL = IS_LIVE ? LIVE_URL : (LOCAL_URL || LIVE_URL);
 
 if (!API_BASE_URL) {
-  console.error('VITE_API_BASE_URL is not defined! Please check your environment variables.');
+  console.error('API Base URL is not defined! Please check your VITE_API_BASE_URL or VITE_API_BASE_URL_LOCAL environment variables.');
 }
 
 const ACCESS_TOKEN_KEY = 'accessToken';

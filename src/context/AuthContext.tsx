@@ -75,6 +75,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const login = useCallback(async (email: string, password: string) => {
         const data: LoginRequest = { email, password };
         const response = await authApi.login(data);
+        if (!response.user.isEmailVerified) {
+            throw new Error('UNVERIFIED_EMAIL');
+        }
         setUser(response.user);
     }, []);
 
@@ -106,10 +109,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const verifyEmail = useCallback(async (data: VerifyEmailRequest) => {
-        await authApi.verifyEmail(data);
-        // Refresh user data after verification
-        const userData = await authApi.getMe();
-        setUser(userData);
+        const response = await authApi.verifyEmail(data);
+        setUser(response.user);
     }, []);
 
     const resendVerification = useCallback(async (email: string) => {

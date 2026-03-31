@@ -34,10 +34,35 @@ function getInitialRoute() {
   return '/home';
 }
 
-import { VerificationBanner } from './components/layout/VerificationBanner';
 import { VERIFICATION_REQUIRED_EVENT } from './api/client';
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from './hooks/useAuth';
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn, isLoading } = useAuth();
+  const location = useLocation();
+
+  if (isLoading) return <Splash />;
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn, isLoading } = useAuth();
+
+  if (isLoading) return <Splash />;
+
+  if (isLoggedIn) {
+    return <Navigate to="/home" replace />;
+  }
+
+  return <>{children}</>;
+}
 
 function GlobalAuthHandler() {
   const navigate = useNavigate();
@@ -65,26 +90,125 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <GlobalAuthHandler />
-        <VerificationBanner />
         <Routes>
           <Route path="/" element={<Splash />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/signup" 
+            element={
+              <PublicRoute>
+                <Signup />
+              </PublicRoute>
+            } 
+          />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/survival" element={<Survival />} />
-          <Route path="/survival/:hazardId" element={<SurvivalDetail />} />
-          <Route path="/report" element={<Report />} />
-          <Route path="/my-reports" element={<MyReports />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/emergency" element={<EmergencyCall />} />
-          <Route path="/hazard-pack" element={<HazardPack />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/security" element={<SecuritySettings />} />
-          <Route path="/settings" element={<Settings />} />
+          
+          {/* Protected Routes */}
+          <Route 
+            path="/onboarding" 
+            element={
+              <ProtectedRoute>
+                <Onboarding />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/home" 
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/survival" 
+            element={
+              <ProtectedRoute>
+                <Survival />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/survival/:hazardId" 
+            element={
+              <ProtectedRoute>
+                <SurvivalDetail />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/report" 
+            element={
+              <ProtectedRoute>
+                <Report />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/my-reports" 
+            element={
+              <ProtectedRoute>
+                <MyReports />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/emergency" 
+            element={
+              <ProtectedRoute>
+                <EmergencyCall />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/hazard-pack" 
+            element={
+              <ProtectedRoute>
+                <HazardPack />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/about" 
+            element={
+              <ProtectedRoute>
+                <About />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/security" 
+            element={
+              <ProtectedRoute>
+                <SecuritySettings />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/settings" 
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/settings/verify-email" element={<VerifyEmail />} />
+          
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Navigate to={getInitialRoute()} replace />} />
