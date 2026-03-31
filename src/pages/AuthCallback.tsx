@@ -11,7 +11,6 @@ export function AuthCallback() {
 
     useEffect(() => {
         const handleCallback = async () => {
-            const accessToken = searchParams.get('accessToken');
             const isNewUser = searchParams.get('isNewUser') === 'true';
             const errorMessage = searchParams.get('message');
 
@@ -20,13 +19,8 @@ export function AuthCallback() {
                 return;
             }
 
-            if (!accessToken) {
-                setError('No access token received');
-                return;
-            }
-
             try {
-                await setUserFromToken(accessToken);
+                await setUserFromToken();
                 navigate(isNewUser ? '/onboarding' : '/home', { replace: true });
             } catch {
                 setError('Failed to complete authentication');

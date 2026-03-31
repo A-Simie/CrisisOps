@@ -8,7 +8,6 @@ if (!API_BASE_URL) {
   console.error('API Base URL is not defined! Please check your VITE_API_BASE_URL or VITE_API_BASE_URL_LOCAL environment variables.');
 }
 
-const ACCESS_TOKEN_KEY = 'accessToken';
 
 export const AUTH_EXPIRED_EVENT = 'auth:expired';
 export const VERIFICATION_REQUIRED_EVENT = 'auth:verification_required';
@@ -21,16 +20,18 @@ export function dispatchVerificationRequired(): void {
   window.dispatchEvent(new CustomEvent(VERIFICATION_REQUIRED_EVENT));
 }
 
+// SECURE: Tokens are now managed via HttpOnly cookies by the browser. 
+// localStorage is no longer used for authentication to prevent XSS theft.
 export function getAccessToken(): string | null {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
+  return null;
 }
 
-export function setAccessToken(token: string): void {
-  localStorage.setItem(ACCESS_TOKEN_KEY, token);
+export function setAccessToken(_token: string): void {
+  // No-op: cookies are set by the backend
 }
 
 export function clearAccessToken(): void {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  // No-op: cookies are cleared by the backend
 }
 
 export class AppError extends Error {
@@ -85,12 +86,8 @@ export async function apiRequest<T>(
   const url = `${API_BASE_URL}${endpoint}`;
   const headers: Record<string, string> = { ...(options.headers as Record<string, string>) };
 
-  if (!skipAuth) {
-    const token = getAccessToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-  }
+  // SECURE: Authorization is now handled via HttpOnly cookies.
+  // The 'Authorization' header is no longer manually injected to prevent XSS exfiltration.
 
   if (!(options.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
@@ -105,7 +102,6 @@ export async function apiRequest<T>(
   if (response.status === 401 && !skipAuth && !endpoint.includes('/auth/refresh')) {
     const newToken = await refreshAccessToken();
     if (newToken) {
-      headers['Authorization'] = `Bearer ${newToken}`;
       response = await fetch(url, { ...options, headers, credentials: 'include' });
     } else {
       const errorData = await response.json().catch(() => ({}));

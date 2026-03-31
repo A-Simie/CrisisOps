@@ -6,7 +6,6 @@ import {
   Signup,
   Onboarding,
   hasCompletedOnboarding,
-  isLoggedIn,
   Home,
   Survival,
   SurvivalDetail,
@@ -25,10 +24,7 @@ import {
 } from './pages';
 
 function getInitialRoute() {
-  if (!isLoggedIn()) {
-    return '/login';
-  }
-  if (!hasCompletedOnboarding()) {
+  if (typeof hasCompletedOnboarding === 'function' && !hasCompletedOnboarding()) {
     return '/onboarding';
   }
   return '/home';
@@ -70,7 +66,6 @@ function GlobalAuthHandler() {
 
   useEffect(() => {
     const handleVerificationRequired = () => {
-      // Avoid redirect loops if already on the verify page
       if (location.pathname !== '/settings/verify-email') {
         navigate('/settings/verify-email', { replace: true });
       }
@@ -92,123 +87,123 @@ export default function App() {
         <GlobalAuthHandler />
         <Routes>
           <Route path="/" element={<Splash />} />
-          <Route 
-            path="/login" 
+          <Route
+            path="/login"
             element={
               <PublicRoute>
                 <Login />
               </PublicRoute>
-            } 
+            }
           />
-          <Route 
-            path="/signup" 
+          <Route
+            path="/signup"
             element={
               <PublicRoute>
                 <Signup />
               </PublicRoute>
-            } 
+            }
           />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          
+
           {/* Protected Routes */}
-          <Route 
-            path="/onboarding" 
+          <Route
+            path="/onboarding"
             element={
               <ProtectedRoute>
                 <Onboarding />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/home" 
+          <Route
+            path="/home"
             element={
               <ProtectedRoute>
                 <Home />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/survival" 
+          <Route
+            path="/survival"
             element={
               <ProtectedRoute>
                 <Survival />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/survival/:hazardId" 
+          <Route
+            path="/survival/:hazardId"
             element={
               <ProtectedRoute>
                 <SurvivalDetail />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/report" 
+          <Route
+            path="/report"
             element={
               <ProtectedRoute>
                 <Report />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/my-reports" 
+          <Route
+            path="/my-reports"
             element={
               <ProtectedRoute>
                 <MyReports />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/profile" 
+          <Route
+            path="/profile"
             element={
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/emergency" 
+          <Route
+            path="/emergency"
             element={
               <ProtectedRoute>
                 <EmergencyCall />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/hazard-pack" 
+          <Route
+            path="/hazard-pack"
             element={
               <ProtectedRoute>
                 <HazardPack />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/about" 
+          <Route
+            path="/about"
             element={
               <ProtectedRoute>
                 <About />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/security" 
+          <Route
+            path="/security"
             element={
               <ProtectedRoute>
                 <SecuritySettings />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/settings" 
+          <Route
+            path="/settings"
             element={
               <ProtectedRoute>
                 <Settings />
               </ProtectedRoute>
-            } 
+            }
           />
           <Route path="/verify-email" element={<VerifyEmail />} />
-          
+
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Navigate to={getInitialRoute()} replace />} />

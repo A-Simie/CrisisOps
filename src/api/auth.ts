@@ -1,4 +1,4 @@
-import { api, apiRequest, setAccessToken, clearAccessToken } from './client';
+import { api, apiRequest, clearAccessToken } from './client';
 
 export interface User {
   id: string;
@@ -70,15 +70,11 @@ if (!API_BASE_URL) {
 
 export const authApi = {
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-    const response = await api.post<LoginResponse>('/auth/login', data);
-    setAccessToken(response.accessToken);
-    return response;
+    return api.post<LoginResponse>('/auth/login', data);
   },
 
   register: async (data: RegisterRequest): Promise<LoginResponse> => {
-    const response = await api.post<LoginResponse>('/auth/register', data);
-    setAccessToken(response.accessToken);
-    return response;
+    return api.post<LoginResponse>('/auth/register', data);
   },
 
   logout: async (): Promise<void> => {
@@ -100,7 +96,6 @@ export const authApi = {
         credentials: 'include',
       }, true);
       if (response.accessToken) {
-        setAccessToken(response.accessToken);
         return response.accessToken;
       }
       return null;
@@ -132,9 +127,7 @@ export const authApi = {
   },
 
   verifyEmail: async (data: VerifyEmailRequest): Promise<LoginResponse> => {
-    const response = await api.post<LoginResponse>('/auth/verify-email', data);
-    setAccessToken(response.accessToken);
-    return response;
+    return api.post<LoginResponse>('/auth/verify-email', data);
   },
 
   resendVerification: async (email: string): Promise<void> => {

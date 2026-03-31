@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield } from 'lucide-react';
 import { hasCompletedOnboarding } from './Onboarding';
-import { isLoggedIn } from '../hooks/useAuth';
+import { useAuth } from '../hooks/useAuth';
 
 export function Splash() {
     const navigate = useNavigate();
+    const { isLoggedIn } = useAuth();
     const [progress, setProgress] = useState(0);
     const [loadingText, setLoadingText] = useState('Initializing...');
 
@@ -25,7 +26,7 @@ export function Splash() {
                 currentProgress = 100;
                 clearInterval(interval);
                 setTimeout(() => {
-                    if (!isLoggedIn()) {
+                    if (!isLoggedIn) {
                         navigate('/login', { replace: true });
                     } else if (!hasCompletedOnboarding()) {
                         navigate('/onboarding', { replace: true });

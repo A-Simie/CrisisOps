@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer, Button, Card } from '../components';
-import { useAuth, isLoggedIn as checkIsLoggedIn } from '../hooks/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import {
     User,
@@ -20,14 +20,7 @@ export function Profile() {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
     const { isDark, toggleTheme } = useTheme();
-    const loggedIn = checkIsLoggedIn();
     const [loggingOut, setLoggingOut] = useState(false);
-
-    useEffect(() => {
-        if (!loggedIn) {
-            navigate('/login', { replace: true });
-        }
-    }, [loggedIn, navigate]);
 
     const handleLogout = async () => {
         setLoggingOut(true);
@@ -38,7 +31,7 @@ export function Profile() {
         }
     };
 
-    if (!loggedIn) {
+    if (!user) {
         return null;
     }
 

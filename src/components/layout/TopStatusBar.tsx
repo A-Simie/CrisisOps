@@ -1,14 +1,13 @@
 import { StatusChip } from '../ui/StatusChip';
 import { Shield, User } from 'lucide-react';
 import { useReportQueue } from '../../hooks/useReportQueue';
-import { useAuth, isLoggedIn } from '../../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 export function TopStatusBar() {
     const navigate = useNavigate();
     const { queuedCount, lastSyncTime, lastSyncSummary, syncing, sync } = useReportQueue();
-    const { user } = useAuth();
-    const loggedIn = isLoggedIn();
+    const { user, isLoggedIn } = useAuth();
 
     return (
         <header className="sticky top-0 z-40 bg-bg-primary/95 backdrop-blur-lg border-b border-bg-tertiary safe-area-top">
@@ -29,7 +28,7 @@ export function TopStatusBar() {
                         onSyncClick={sync}
                     />
 
-                    {loggedIn && (
+                    {isLoggedIn && (
                         <button
                             onClick={() => navigate('/profile')}
                             className="flex items-center gap-2 px-2 py-1.5 rounded-full bg-bg-secondary hover:bg-bg-tertiary transition-colors"

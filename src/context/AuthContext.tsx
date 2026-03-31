@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { authApi, type User, type LoginRequest, type RegisterRequest, type UpdateProfileRequest, type VerifyEmailRequest, type ForgotPasswordRequest, type ResetPasswordRequest } from '../api/auth';
-import { getAccessToken, clearAccessToken, setAccessToken, AUTH_EXPIRED_EVENT, VERIFICATION_REQUIRED_EVENT } from '../api/client';
+import { clearAccessToken, AUTH_EXPIRED_EVENT, VERIFICATION_REQUIRED_EVENT } from '../api/client';
 
 interface AuthContextType {
     user: User | null;
@@ -10,7 +10,7 @@ interface AuthContextType {
     signup: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     updateProfile: (data: UpdateProfileRequest) => Promise<void>;
-    setUserFromToken: (token: string) => Promise<void>;
+    setUserFromToken: () => Promise<void>;
     verifyEmail: (data: VerifyEmailRequest) => Promise<void>;
     resendVerification: (email: string) => Promise<void>;
     forgotPassword: (data: ForgotPasswordRequest) => Promise<void>;
@@ -24,17 +24,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchUser = useCallback(async () => {
-        const token = getAccessToken();
-        if (!token) {
-            setIsLoading(false);
-            return;
-        }
-
+        // SECURE: We no longer check localStorage for tokens. 
+        // We call /auth/me directly; if the cookie is valid, the backend returns the user.
         try {
             const userData = await authApi.getMe();
             setUser(userData);
         } catch {
-            clearAccessToken();
+            // No valid session cookie found
             setUser(null);
         } finally {
             setIsLoading(false);
@@ -96,13 +92,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(updatedUser);
     }, []);
 
-    const setUserFromToken = useCallback(async (token: string) => {
-        setAccessToken(token);
+    const setUserFromToken = useCallback(async () => {
+        // This is now just a session refresh/fetch call
         try {
             const userData = await authApi.getMe();
             setUser(userData);
         } catch (err) {
-            clearAccessToken();
+            setUser(null);
             const message = err instanceof Error ? err.message : 'Failed to fetch user data';
             throw new Error(message);
         }
