@@ -1,4 +1,4 @@
-const SALT_KEY = 'crisisops-secure-salt';
+const SALT_KEY = import.meta.env.VITE_SALT_KEY;
 
 async function getSalt(): Promise<Uint8Array> {
   const existingSalt = localStorage.getItem(SALT_KEY);
@@ -37,7 +37,7 @@ async function deriveKey(secret: string, salt: Uint8Array): Promise<CryptoKey> {
   );
 }
 
-const DEFAULT_SECRET = import.meta.env.VITE_APP_SECRET || 'crisisops-default-secret';
+const DEFAULT_SECRET = import.meta.env.VITE_APP_SECRET;
 
 export async function encryptData(data: string, secret: string = DEFAULT_SECRET): Promise<string> {
   try {
@@ -45,7 +45,7 @@ export async function encryptData(data: string, secret: string = DEFAULT_SECRET)
     const key = await deriveKey(secret, salt);
     const iv = window.crypto.getRandomValues(new Uint8Array(12));
     const encodedData = new TextEncoder().encode(data);
-    
+
     const ciphertext = await window.crypto.subtle.encrypt(
       { name: 'AES-GCM', iv },
       key,
@@ -55,7 +55,7 @@ export async function encryptData(data: string, secret: string = DEFAULT_SECRET)
     const combined = new Uint8Array(iv.length + ciphertext.byteLength);
     combined.set(iv, 0);
     combined.set(new Uint8Array(ciphertext), iv.length);
-    
+
     return btoa(String.fromCharCode(...combined));
   } catch (e) {
     throw new Error('Encryption failed');
