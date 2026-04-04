@@ -64,7 +64,7 @@ export function Report() {
             case 'severity': return true;
             case 'media': return true;
             case 'location': return hasLocation;
-            case 'details': return true;
+            case 'details': return (description.trim().length === 0 || description.trim().length >= 10);
             case 'confirm': return true;
             default: return false;
         }
@@ -440,13 +440,31 @@ export function Report() {
                                         onChange={(e) => setDescription(e.target.value)}
                                         placeholder="Describe what you see..."
                                         rows={4}
-                                        className="
-                      w-full p-3 bg-bg-secondary rounded-[--radius-md]
-                      text-text-primary placeholder:text-text-muted
-                      border border-transparent focus:border-accent focus:outline-none
-                      resize-none
-                    "
+                                        className={`
+                                            w-full p-3 bg-bg-secondary rounded-[--radius-md]
+                                            text-text-primary placeholder:text-text-muted
+                                            border focus:outline-none resize-none transition-all
+                                            ${description.trim().length > 0 && description.trim().length < 10 
+                                                ? 'border-danger focus:border-danger' 
+                                                : 'border-transparent focus:border-accent'
+                                            }
+                                        `}
                                     />
+                                    <div className="flex items-center justify-between mt-1.5 px-0.5">
+                                        {description.trim().length > 0 && description.trim().length < 10 && (
+                                            <p className="text-xs text-danger flex items-center gap-1 font-medium italic">
+                                                <AlertCircle className="w-3 h-3" />
+                                                At least 10 characters required
+                                            </p>
+                                        )}
+                                        <p className={`text-[10px] ml-auto uppercase tracking-wider font-bold ${
+                                            description.trim().length > 0 && description.trim().length < 10 
+                                                ? 'text-danger' 
+                                                : 'text-text-muted'
+                                        }`}>
+                                            {description.trim().length} / 10+ Characters
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <div>
