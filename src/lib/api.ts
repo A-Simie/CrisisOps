@@ -1,10 +1,4 @@
-import { getAccessToken, clearAccessToken, dispatchAuthExpired } from '../api/client';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-if (!API_BASE_URL) {
-  console.error('VITE_API_BASE_URL is not defined in lib/api.ts!');
-}
+import { apiRequest } from '../api/client';
 
 export interface UploadedMedia {
   url: string;
@@ -53,57 +47,11 @@ export interface ApiError extends Error {
   isAuthError?: boolean;
 }
 
-async function request<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const headers: HeadersInit = { ...options.headers };
-
-  const token = getAccessToken();
-  if (token) {
-    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
-  }
-
-  // Only set Content-Type for non-FormData requests
-  if (!(options.body instanceof FormData)) {
-    (headers as Record<string, string>)['Content-Type'] = 'application/json';
-  }
-
-  const response = await fetch(url, { ...options, headers });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    
-    // Handle auth errors - trigger logout
-    if (response.status === 401) {
-      clearAccessToken();
-      dispatchAuthExpired();
-      const message = errorData.message || 'Session expired. Please log in again.';
-      const error: ApiError = new Error(message);
-      error.statusCode = 401;
-      error.isAuthError = true;
-      throw error;
-    }
-    
-    const error: ApiError = new Error(errorData.message || `Request failed: ${response.status}`);
-    error.statusCode = response.status;
-    throw error;
-  }
-
-  if (response.status === 204) {
-    return {} as T;
-  }
-
-  const json = await response.json();
-  return json.data ?? json;
-}
-
 export async function uploadIncidentMedia(file: File): Promise<UploadedMedia> {
   const formData = new FormData();
   formData.append('media', file);
 
-  return request<UploadedMedia>('/incidents/media/upload', {
+  return apiRequest<UploadedMedia>('/incidents/media/upload', {
     method: 'POST',
     body: formData,
   });
@@ -112,7 +60,7 @@ export async function uploadIncidentMedia(file: File): Promise<UploadedMedia> {
 export async function createIncident(
   payload: CreateIncidentPayload
 ): Promise<{ id: string }> {
-  return request<{ id: string }>('/incidents', {
+  return apiRequest<{ id: string }>('/incidents', {
     method: 'POST',
     body: JSON.stringify(payload),
     headers: {
@@ -134,7 +82,7 @@ export async function getNearbyIncidents(params: {
     ...(params.excludeResolved !== undefined && { excludeResolved: params.excludeResolved.toString() }),
   });
 
-  return request<Incident[]>(`/incidents/nearby?${query.toString()}`);
+  return apiRequest<Incident[]>(`/incidents/nearby?${query.toString()}`);
 }
 
 export const api = {
