@@ -58,13 +58,14 @@ export async function uploadIncidentMedia(file: File): Promise<UploadedMedia> {
 }
 
 export async function createIncident(
-  payload: CreateIncidentPayload
+  payload: CreateIncidentPayload,
+  idempotencyKey?: string
 ): Promise<{ id: string }> {
   return apiRequest<{ id: string }>('/incidents', {
     method: 'POST',
     body: JSON.stringify(payload),
     headers: {
-      'Idempotency-Key': crypto.randomUUID(),
+      'Idempotency-Key': idempotencyKey || crypto.randomUUID(),
     },
   });
 }

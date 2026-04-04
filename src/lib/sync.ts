@@ -8,6 +8,9 @@ interface SyncResult {
   errors: string[];
 }
 
+// Module-level sync lock to prevent concurrent sync operations
+let isSyncing = false;
+
 // Map frontend hazard IDs to backend HazardType enum values
 const HAZARD_TYPE_MAP: Record<string, string> = {
   'flood': 'FLOOD',
@@ -60,7 +63,7 @@ async function sendReportToServer(report: Report): Promise<{ success: boolean; s
       })),
     };
 
-    const result = await api.createIncident(payload);
+    const result = await api.createIncident(payload, report.id);
     return { success: true, serverId: result.id };
   } catch (error) {
     console.error('Failed to send report:', error);
@@ -76,36 +79,46 @@ export async function syncReports(): Promise<SyncResult> {
     errors: [],
   };
 
+  if (isSyncing) {
+    return { ...result, success: false, errors: ['Sync already in progress'] };
+  }
+
   if (!navigator.onLine) {
     result.success = false;
     result.errors.push('No network connection');
     return result;
   }
 
-  const queuedReports = await getQueuedReports();
-  
-  for (const report of queuedReports) {
-    try {
-      const response = await sendReportToServer(report);
-      
-      if (response.success && response.serverId) {
-        await updateReportStatus(report.id, 'sent', response.serverId);
-        result.synced++;
-      } else {
+  isSyncing = true;
+  try {
+    const queuedReports = await getQueuedReports();
+    
+    for (const report of queuedReports) {
+      try {
+        const response = await sendReportToServer(report);
+        
+        if (response.success && response.serverId) {
+          await updateReportStatus(report.id, 'sent', response.serverId);
+          result.synced++;
+        } else {
+          result.failed++;
+          result.errors.push(`Failed to sync report ${report.id}`);
+        }
+      } catch (error) {
         result.failed++;
-        result.errors.push(`Failed to sync report ${report.id}`);
+        result.errors.push(`Error syncing report ${report.id}: ${error}`);
       }
-    } catch (error) {
-      result.failed++;
-      result.errors.push(`Error syncing report ${report.id}: ${error}`);
     }
-  }
 
-  if (result.synced > 0) {
-    await setSyncMeta('lastSyncTime', Date.now());
-  }
+    if (result.synced > 0) {
+      await setSyncMeta('lastSyncTime', Date.now());
+    }
 
-  result.success = result.failed === 0;
+    result.success = result.failed === 0;
+  } finally {
+    isSyncing = false;
+  }
+  
   return result;
 }
 
