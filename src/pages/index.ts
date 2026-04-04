@@ -17,4 +17,5 @@ export { VerifyEmail } from './VerifyEmail';
 export { Settings } from './Settings';
 export { ForgotPassword } from './ForgotPassword';
 export { ResetPassword } from './ResetPassword';
+export { AuthError } from './AuthError';
 

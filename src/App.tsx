@@ -20,7 +20,8 @@ import {
   VerifyEmail,
   ForgotPassword,
   ResetPassword,
-  Settings
+  Settings,
+  AuthError
 } from './pages';
 
 function getInitialRoute() {
@@ -104,6 +105,8 @@ export default function App() {
             }
           />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/auth/error" element={<AuthError />} />
+          <Route path="/login/auth/error" element={<AuthError />} />
 
           {/* Protected Routes */}
           <Route
