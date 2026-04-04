@@ -46,22 +46,33 @@ export function Login() {
         setError('');
 
         try {
+            // Pre-auth email check
+            const { exists } = await authApi.checkEmail(email);
+            if (!exists) {
+                setError('Account not found. Please create an account.');
+                setLoading(false);
+                return;
+            }
+
             await login(email, password);
             navigate('/home');
         } catch (err) {
-            if (err instanceof Error && err.message === 'UNVERIFIED_EMAIL') {
+            if (err instanceof Error && err.message.toLowerCase().includes('not found')) {
+                setError('Account not found. Please create an account.');
+            } else if (err instanceof Error && err.message === 'UNVERIFIED_EMAIL') {
                 navigate('/verify-email', { state: { email } });
                 return;
+            } else {
+                const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
+                setError(message);
             }
-            const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
-            setError(message);
         }
         setLoading(false);
     };
 
     const handleGoogleLogin = () => {
         setGoogleLoading(true);
-        window.location.href = authApi.getGoogleAuthUrl();
+        window.location.href = authApi.getGoogleAuthUrl('login');
     };
 
     return (

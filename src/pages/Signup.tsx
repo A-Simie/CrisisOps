@@ -104,7 +104,7 @@ export function Signup() {
 
     const handleGoogleSignup = () => {
         setGoogleLoading(true);
-        window.location.href = authApi.getGoogleAuthUrl();
+        window.location.href = authApi.getGoogleAuthUrl('signup');
     };
 
     return (

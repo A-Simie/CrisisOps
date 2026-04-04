@@ -114,8 +114,12 @@ export const authApi = {
     return api.patch<User>('/auth/profile', formData);
   },
 
-  getGoogleAuthUrl: (): string => {
-    return `${API_BASE_URL}/auth/google`;
+  getGoogleAuthUrl: (action: 'login' | 'signup'): string => {
+    return `${API_BASE_URL}/auth/google?from=user&action=${action}`;
+  },
+
+  checkEmail: async (email: string): Promise<{ exists: boolean }> => {
+    return api.post<{ exists: boolean }>('/auth/check-email', { email });
   },
 
   changePassword: async (data: ChangePasswordRequest): Promise<void> => {
